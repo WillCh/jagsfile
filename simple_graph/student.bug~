@@ -1,0 +1,29 @@
+# I hope this will work. ~Daniel Seita.
+# EDIT: Yes, it seems to work for generating samples from a fixed CPT. 
+# Note: if I want to assume a variable is fixed, I change the "student-data.R" file, and I get rid
+# of the "p.variable_name" variable, along with the node in the "model" scope.
+# Be careful: I've already checked to make sure that "grade" is organized correctly here.
+
+var
+  intelligence[N], difficulty[N], sat[N], grade[N], letter[N],
+  p.intelligence[2], p.difficulty[2], p.sat[2,2], p.grade[2,2,3], p.letter[3,2],
+  theta.intelligence[2], theta.difficulty[2], theta.sat[2,2], theta.grade[2,2,3], theta.letter[N,3,2],
+  alpha[3,2], count[3,2,N], co[2], prior[2];
+
+model {
+
+  # This should run N independent Gibbs chains, each of which has different "fixed" values.
+  for (i in 1:N) {
+    intelligence[i] ~ dcat(p.intelligence[])
+    difficulty[i] ~ dcat(p.difficulty[])
+    sat[i] ~ dcat(p.sat[intelligence[i],])
+    grade[i] ~ dcat(p.grade[intelligence[i],difficulty[i],])
+
+    theta.letter[i,1,] ~ ddirich( alpha[1,] )
+    theta.letter[i,2,] ~ ddirich( alpha[2,] )
+    theta.letter[i,3,] ~ ddirich( alpha[3,] )
+    letter[i] ~ dcat(theta.letter[i,grade[i],])
+  }
+
+}
+
